@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  @font-face {
+    font-family: "Lilex";
+    src: url("lilex-var.ttf") format("truetype-variations");
+    font-weight: 100 900;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: oklch(0.19 0.005 260);
+    --bg2: oklch(0.21 0.006 260);
+    --fg: oklch(0.92 0.005 90);
+    --muted: oklch(0.235 0.006 260);
+    --mutedfg: oklch(0.62 0.01 260);
+    --border: oklch(0.29 0.008 260);
+    --accent: oklch(0.26 0.008 260);
+    --danger: oklch(0.65 0.19 27);
+    --danger-soft: oklch(0.26 0.05 27);
+    --ok: oklch(0.7 0.14 150);
+    --warn: oklch(0.75 0.13 80);
+    --warn-soft: oklch(0.27 0.04 85);
+    --app: oklch(0.72 0.13 255);
+    --app-soft: oklch(0.28 0.05 255);
+    --sys: oklch(0.72 0.12 310);
+    --sys-soft: oklch(0.28 0.05 310);
+  }
+  body {
+    font-family: "Lilex", ui-monospace, monospace;
+    background: var(--bg);
+    color: var(--fg);
+    width: 1270px;
+    height: 760px;
+    overflow: hidden;
+  }
+  .slide { width: 1270px; height: 760px; display: none; position: relative; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  .eyebrow {
+    font-size: 13px; font-weight: 550; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--mutedfg); margin-bottom: 16px;
+  }
+  h1 { font-size: 50px; font-weight: 700; letter-spacing: -0.035em; line-height: 1.12; }
+  h2 { font-size: 42px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; }
+  .sub { font-size: 19px; line-height: 1.55; color: var(--mutedfg); }
+
+  /* shared mock window */
+  .win {
+    text-align: left;
+    border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+    background: var(--bg2); box-shadow: 0 32px 64px -28px oklch(0 0 0 / 0.55);
+  }
+  .bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 13px 16px; border-bottom: 1px solid var(--border);
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .d1 { background: #ff5f57; } .d2 { background: #febc2e; } .d3 { background: #28c840; }
+  .bar b { font-size: 14px; margin-left: 5px; }
+  .bar .c { color: var(--mutedfg); font-size: 12.5px; }
+  .row {
+    display: flex; align-items: center; gap: 16px;
+    padding: 13px 16px; border-bottom: 1px solid var(--border); font-size: 14px;
+  }
+  .row:last-child { border-bottom: none; }
+  .port { font-weight: 650; width: 72px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .proc { flex: 1; min-width: 0; }
+  .proc b { display: block; font-weight: 550; }
+  .proc span { font-size: 12px; color: var(--mutedfg); }
+  .badge {
+    font-size: 10px; font-weight: 550; text-transform: uppercase;
+    letter-spacing: 0.06em; padding: 3px 8px; border-radius: 5px; white-space: nowrap;
+  }
+  .b-dev { background: var(--accent); color: var(--ok); }
+  .b-sys { background: var(--sys-soft); color: var(--sys); }
+  .b-app { background: var(--app-soft); color: var(--app); }
+  .icons { display: flex; gap: 10px; color: var(--mutedfg); align-items: center; }
+  svg { display: block; flex-shrink: 0; }
+
+  /* slide 1: hero */
+  #s1 { flex-direction: column; align-items: center; text-align: center; padding-top: 76px; }
+  #s1 img { width: 88px; height: 88px; border-radius: 20px; margin-bottom: 28px; }
+  #s1 h1 { margin-bottom: 14px; }
+  #s1 .sub { margin-bottom: 42px; }
+  #s1 .win { width: 880px; font-size: 14px; }
+
+  /* slides 2-5: split layout */
+  .split { align-items: center; gap: 70px; padding: 0 90px; }
+  .split .text { width: 400px; flex-shrink: 0; }
+  .split .text h2 { margin-bottom: 16px; }
+  .split .visual { flex: 1; display: flex; justify-content: center; }
+
+  /* dialog mock */
+  .dialog {
+    width: 430px; border: 1px solid var(--border); border-radius: 12px;
+    background: var(--bg2); padding: 24px;
+    box-shadow: 0 32px 64px -28px oklch(0 0 0 / 0.6);
+    font-size: 13.5px;
+  }
+  .dialog h3 { font-size: 16px; font-weight: 650; margin-bottom: 14px; }
+  .dialog dl { display: grid; grid-template-columns: 110px 1fr; gap: 6px 14px; font-size: 13px; margin-bottom: 16px; }
+  .dialog dt { color: var(--mutedfg); }
+  .note {
+    display: flex; gap: 8px; align-items: flex-start;
+    background: var(--muted); border-radius: 8px; padding: 11px 13px;
+    font-size: 12.5px; color: var(--mutedfg); margin-bottom: 18px; line-height: 1.5;
+  }
+  .note svg { margin-top: 2px; color: var(--warn); }
+  .btns { display: flex; justify-content: flex-end; gap: 9px; }
+  .btn {
+    font-size: 13px; font-weight: 550; padding: 9px 16px; border-radius: 8px;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-ghost { color: var(--mutedfg); }
+  .btn-outline { border: 1px solid var(--border); color: var(--danger); }
+  .btn-danger { background: var(--danger-soft); color: var(--danger); }
+  .btn-solid { background: var(--fg); color: var(--bg); }
+  .check {
+    display: flex; gap: 11px; align-items: center;
+    border: 1px solid var(--border); border-radius: 9px; padding: 13px 15px; margin-bottom: 10px;
+  }
+  .check .box { color: var(--fg); }
+  .check b { display: block; font-size: 13.5px; font-weight: 550; }
+  .check span { font-size: 12px; color: var(--mutedfg); }
+
+  .conflict-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--warn-soft); color: var(--warn);
+    font-size: 12px; font-weight: 550; padding: 5px 11px; border-radius: 7px;
+  }
+
+  /* slide 5 */
+  .pill-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+  .pill {
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 8px 16px; font-size: 13.5px; color: var(--mutedfg);
+  }
+  .lang-card { width: 470px; }
+  .lang-card .row { font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- 1: hero / social preview -->
+<div class="slide" id="s1">
+  <img src="icon.png" alt="" />
+  <h1>Every open port on your Mac,<br/>explained.</h1>
+  <p class="sub">Free and open source port manager for macOS</p>
+  <div class="win">
+    <div class="bar"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><b>Portero</b><span class="c">4 listening ports</span></div>
+    <div class="row">
+      <span class="port">3000 <svg style="display:inline;vertical-align:-2px" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="oklch(0.75 0.13 80)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M10.4 3.9L1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.6 3.9a2 2 0 0 0-3.2 0z"/><path d="M12 16h.01"/></svg></span>
+      <span class="proc"><b>node</b><span>Next.js dev server · project "storefront"</span></span>
+      <span class="badge b-dev">Terminal</span>
+      <span class="icons"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="oklch(0.72 0.13 255)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8"/><path d="M3.6 15h16.8"/><path d="M11.5 3a17 17 0 0 0 0 18"/><path d="M12.5 3a17 17 0 0 1 0 18"/></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg></span>
+    </div>
+    <div class="row">
+      <span class="port">5173</span>
+      <span class="proc"><b>node</b><span>Vite dev server · project "portero"</span></span>
+      <span class="badge b-dev">Terminal</span>
+      <span class="icons"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="oklch(0.72 0.13 255)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8"/><path d="M3.6 15h16.8"/><path d="M11.5 3a17 17 0 0 0 0 18"/><path d="M12.5 3a17 17 0 0 1 0 18"/></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg></span>
+    </div>
+    <div class="row">
+      <span class="port">5432</span>
+      <span class="proc"><b>postgres</b><span>PostgreSQL database</span></span>
+      <span class="badge b-dev">Terminal</span>
+      <span class="icons"><svg width="14" height="14" viewBox="0 0 24 24" fill="oklch(0.75 0.13 80)" stroke="none"><path d="M12 17.75l-6.17 3.25 1.18-6.88-5-4.87 6.9-1L12 2l3.09 6.25 6.9 1-5 4.87 1.18 6.88z"/></svg></span>
+    </div>
+    <div class="row">
+      <span class="port">7000 <svg style="display:inline;vertical-align:-2px" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="oklch(0.65 0.19 27)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><circle cx="12" cy="16" r="1"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+      <span class="proc"><b>ControlCenter</b><span>Control Center, AirPlay receiver</span></span>
+      <span class="badge b-sys">System</span>
+      <span class="icons"></span>
+    </div>
+  </div>
+</div>
+
+<!-- 2: plain words -->
+<div class="slide split" id="s2">
+  <div class="text">
+    <p class="eyebrow">Plain words</p>
+    <h2>"node" tells you nothing.</h2>
+    <p class="sub">Portero recognizes hundreds of processes, dev tools, and well-known ports, and explains each one: which tool, which project, why it's there.</p>
+  </div>
+  <div class="visual">
+    <div class="win" style="width: 560px">
+      <div class="row">
+        <span class="port">3000</span>
+        <span class="proc"><b>node</b><span style="color: oklch(0.7 0.14 150)">Next.js dev server · project "storefront"</span></span>
+      </div>
+      <div class="row">
+        <span class="port">8888</span>
+        <span class="proc"><b>python3</b><span style="color: oklch(0.7 0.14 150)">Jupyter Notebook</span></span>
+      </div>
+      <div class="row">
+        <span class="port">5000</span>
+        <span class="proc"><b>ControlCenter</b><span style="color: oklch(0.7 0.14 150)">macOS AirPlay, not your Flask app</span></span>
+      </div>
+      <div class="row">
+        <span class="port">54321</span>
+        <span class="proc"><b>sharingd</b><span style="color: oklch(0.7 0.14 150)">AirDrop and sharing</span></span>
+      </div>
+      <div class="row">
+        <span class="port">6379</span>
+        <span class="proc"><b>redis-server</b><span style="color: oklch(0.7 0.14 150)">Redis database</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3: conflicts + kill -->
+<div class="slide split" id="s3">
+  <div class="text">
+    <p class="eyebrow">Conflicts and control</p>
+    <h2>"Address already in use", solved.</h2>
+    <p class="sub">Portero flags ports with more than one process, and killing is always a conscious choice: graceful stop or force, never a blind kill -9.</p>
+    <div style="margin-top: 22px">
+      <span class="conflict-tag">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M10.4 3.9L1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.6 3.9a2 2 0 0 0-3.2 0z"/><path d="M12 16h.01"/></svg>
+        2 ports in conflict
+      </span>
+    </div>
+  </div>
+  <div class="visual">
+    <div class="dialog">
+      <h3>Kill "node"?</h3>
+      <dl>
+        <dt>What it is</dt><dd>Next.js dev server · project "storefront"</dd>
+        <dt>Port</dt><dd>127.0.0.1:3000 · TCP</dd>
+        <dt>PID</dt><dd>48291</dd>
+      </dl>
+      <div class="note">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M10.4 3.9L1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.6 3.9a2 2 0 0 0-3.2 0z"/><path d="M12 16h.01"/></svg>
+        <span><b style="color: var(--fg)">Kill</b> asks the process to shut down safely. <b style="color: var(--fg)">Force</b> kills immediately, use it only if it doesn't respond.</span>
+      </div>
+      <div class="btns">
+        <span class="btn btn-ghost">Cancel</span>
+        <span class="btn btn-outline">Force</span>
+        <span class="btn btn-danger">Kill process</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4: firewall -->
+<div class="slide split" id="s4">
+  <div class="text">
+    <p class="eyebrow">Native firewall</p>
+    <h2>Block ports without touching system files.</h2>
+    <p class="sub">Rules go into a dedicated anchor of the built-in macOS pf firewall. Inbound, outbound, or both, confirmed with your admin password.</p>
+  </div>
+  <div class="visual">
+    <div class="dialog">
+      <h3>Block port 8080</h3>
+      <div class="check">
+        <span class="box"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M9 12.5l2 2 4-4.5" stroke="oklch(0.21 0.006 260)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span><b>Block inbound</b><span>Connections from outside reaching this port</span></span>
+      </div>
+      <div class="check">
+        <span class="box"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M9 12.5l2 2 4-4.5" stroke="oklch(0.21 0.006 260)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span><b>Block outbound</b><span>Connections leaving this machine through this port</span></span>
+      </div>
+      <div class="note" style="margin-top: 16px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><circle cx="12" cy="16" r="1"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        <span>Uses the macOS firewall (pf). Your admin password is requested to apply.</span>
+      </div>
+      <div class="btns">
+        <span class="btn btn-ghost">Cancel</span>
+        <span class="btn btn-solid">Block</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5: open source -->
+<div class="slide split" id="s5">
+  <div class="text">
+    <p class="eyebrow">Yours</p>
+    <h2>Free, open source, in your language.</h2>
+    <p class="sub">Built with Tauri and Rust on top of the same native tools you'd use in the terminal. English and Portuguese out of the box.</p>
+    <div class="pill-row">
+      <span class="pill">macOS · Apple Silicon + Intel</span>
+      <span class="pill">Open source</span>
+      <span class="pill">EN · PT</span>
+    </div>
+  </div>
+  <div class="visual">
+    <div class="win lang-card">
+      <div class="bar"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><b>Settings</b></div>
+      <div class="row"><span class="proc"><b>Language</b><span>Idioma da interface</span></span><span class="badge b-app" style="font-size: 12px; padding: 5px 12px">Português · English</span></div>
+      <div class="row"><span class="proc"><b>Interface sounds</b><span>Small sound effects when interacting</span></span><span class="badge b-dev" style="font-size: 12px; padding: 5px 12px">On</span></div>
+      <div class="row"><span class="proc"><b>Refresh interval</b><span>How often the port list is refreshed</span></span><span class="badge b-sys" style="font-size: 12px; padding: 5px 12px">2s · 4s · 8s</span></div>
+      <div class="row"><span class="proc"><b>Firewall blocks</b><span>Reapply rules after a restart</span></span><span class="badge b-app" style="font-size: 12px; padding: 5px 12px">Reapply</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const n = new URLSearchParams(location.search).get("slide") || "1";
+  document.getElementById("s" + n).classList.add("active");
+</script>
+
+</body>
+</html>

@@ -1,11 +1,13 @@
 <p align="center">
-  <img src="icon.png" alt="Portero icon" width="128" height="128" />
+  <a href="https://porteroapp.pages.dev">
+    <img src="docs/media/1-hero.png" alt="Portero: every open port on your Mac, explained" />
+  </a>
 </p>
 
-<h1 align="center">Portero</h1>
-
 <p align="center">
-  See, understand, and control everything listening on your Mac's ports.
+  <a href="https://porteroapp.pages.dev">Website</a> ·
+  <a href="https://github.com/ctresb/portero/releases/latest">Download</a> ·
+  <a href="https://porteroapp.pages.dev/faq">FAQ</a>
 </p>
 
 ## Why
@@ -27,6 +29,10 @@ Portero gives you a clear view of everything running on your machine, so you alw
 - **Search, filter, and sort** by port, process, path, command line, or PID.
 - **Two languages.** English and Portuguese, switchable in Settings.
 
+<p align="center">
+  <img src="docs/media/2-plain-words.png" alt="Portero explains each process in plain words" />
+</p>
+
 ## Install
 
 Grab the latest `.dmg` for your Mac (Apple Silicon or Intel) from the [Releases](../../releases) page, open it, and drag Portero to Applications.
@@ -39,10 +45,22 @@ Builds are not signed with an Apple Developer certificate yet. The first time yo
 2. Click a row to expand it and see the full command line, working directory, parent process, and a plain-language description of what it is.
 3. Use the filter tabs (All, System, Apps, Terminal, Other, Favorites, Conflicts) or the search box to find what you're looking for.
 4. Click **Kill** on a row to stop a process. You'll get a confirmation dialog with the choice between a graceful stop and a forced kill.
+
+<p align="center">
+  <img src="docs/media/3-conflicts-kill.png" alt="Portero detects port conflicts and confirms every kill" />
+</p>
 5. Click the lock icon to block a port's traffic through the macOS firewall. macOS will ask for your administrator password.
+
+<p align="center">
+  <img src="docs/media/4-firewall.png" alt="Portero blocks ports using the built-in macOS pf firewall" />
+</p>
 6. Click the globe icon (shown only when the port serves HTTP) to open that server in your browser.
 7. Star anything you never want to kill by accident.
 8. Open **Settings** (gear icon) to change the language, toggle interface sounds, adjust the refresh interval, or reapply firewall rules.
+
+<p align="center">
+  <img src="docs/media/5-open-source.png" alt="Portero is free, open source, and available in English and Portuguese" />
+</p>
 
 > **Note:** pf firewall rules do not survive a reboot, but Portero remembers your blocks. After restarting your Mac, open Settings and click **Reapply rules**.
 
