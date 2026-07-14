@@ -70,7 +70,7 @@ pnpm tauri dev
 pnpm tauri build
 ```
 
-Tagged pushes (`v*`) also build automatically on GitHub Actions for both Apple Silicon and Intel, and attach the bundles to a draft release.
+Tagged pushes (`v*`) also build automatically on GitHub Actions for both Apple Silicon and Intel, and publish a release with the bundles attached.
 
 ## License
 

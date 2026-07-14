@@ -1,7 +1,7 @@
 # Builds the Portero macOS app.
 #
 # - Push a tag like `v0.1.0` -> builds both architectures and creates a
-#   draft GitHub Release with the .dmg / .app bundles attached.
+#   GitHub Release with the .dmg / .app bundles attached.
 # - Manual run (workflow_dispatch) -> builds and uploads the bundles as
 #   workflow artifacts, no release created.
 #
@@ -57,10 +57,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: --target ${{ matrix.target }}
-          # On tag pushes, create a draft release with the bundles attached.
+          # On tag pushes, publish a release with the bundles attached.
           tagName: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
           releaseName: ${{ startsWith(github.ref, 'refs/tags/') && format('Portero {0}', github.ref_name) || '' }}
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
 
       - name: Upload artifacts (manual runs)

@@ -23,5 +23,5 @@ Key facts:
 Links:
 - Website: https://porteroapp.pages.dev/
 - FAQ (how to see, kill, and block ports on macOS): https://porteroapp.pages.dev/faq
-- Download: https://github.com/joaodavisn/portero/releases/latest
-- Source code: https://github.com/joaodavisn/portero
+- Download: https://github.com/ctresb/portero/releases/latest
+- Source code: https://github.com/ctresb/portero
