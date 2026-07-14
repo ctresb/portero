@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Portero: See and Manage Open Ports on Mac | Free Port Manager for macOS</title>
+<meta name="description" content="Portero is a free, open source Mac app that shows every open port and the process behind it. See what's running, kill processes on busy ports, fix 'address already in use' errors, and block ports with the built-in macOS firewall." />
+<link rel="canonical" href="https://porteroapp.pages.dev/" />
+<meta name="robots" content="index, follow, max-image-preview:large" />
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#fbfbfa" />
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#17181c" />
+<link rel="icon" type="image/png" href="icon.png" />
+<link rel="apple-touch-icon" href="icon.png" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Portero" />
+<meta property="og:url" content="https://porteroapp.pages.dev/" />
+<meta property="og:title" content="Portero: See and Manage Open Ports on Mac" />
+<meta property="og:description" content="Free, open source Mac app that shows every open port and the process behind it. Kill what you don't need, block ports, and fix 'address already in use' errors." />
+<meta property="og:image" content="https://porteroapp.pages.dev/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Portero app icon next to a table of listening ports on macOS" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Portero: See and Manage Open Ports on Mac" />
+<meta name="twitter:description" content="Free, open source Mac app that shows every open port and the process behind it. Kill, block, and fix port conflicts." />
+<meta name="twitter:image" content="https://porteroapp.pages.dev/og.png" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Portero",
+  "operatingSystem": "macOS",
+  "applicationCategory": "DeveloperApplication",
+  "url": "https://porteroapp.pages.dev/",
+  "image": "https://porteroapp.pages.dev/icon.png",
+  "description": "Portero shows every listening port on your Mac with the process behind it explained in plain words. Kill processes, detect port conflicts, block ports with the macOS firewall, and open dev servers in the browser.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "downloadUrl": "https://github.com/joaodavisn/portero/releases/latest",
+  "featureList": [
+    "Live list of all listening TCP and UDP ports",
+    "Plain-language explanation of each process",
+    "Kill processes gracefully or by force",
+    "Port conflict detection (address already in use)",
+    "Block ports with the built-in macOS pf firewall",
+    "Open HTTP dev servers in the browser",
+    "English and Portuguese interface"
+  ]
+}
+</script>
+<style>
+  @font-face {
+    font-family: "Lilex";
+    src: url("lilex-var.ttf") format("truetype-variations");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  :root {
+    --background: oklch(0.985 0.002 90);
+    --foreground: oklch(0.21 0.01 260);
+    --muted: oklch(0.955 0.003 90);
+    --muted-foreground: oklch(0.52 0.01 260);
+    --border: oklch(0.9 0.004 90);
+    --accent: oklch(0.94 0.004 90);
+    --danger: oklch(0.55 0.2 27);
+    --danger-soft: oklch(0.95 0.03 27);
+    --ok: oklch(0.55 0.15 150);
+    --warn: oklch(0.62 0.15 70);
+    --warn-soft: oklch(0.96 0.04 85);
+    --app: oklch(0.55 0.15 255);
+    --app-soft: oklch(0.95 0.03 255);
+    --sys: oklch(0.52 0.14 310);
+    --sys-soft: oklch(0.95 0.03 310);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: oklch(0.19 0.005 260);
+      --foreground: oklch(0.92 0.005 90);
+      --muted: oklch(0.235 0.006 260);
+      --muted-foreground: oklch(0.62 0.01 260);
+      --border: oklch(0.29 0.008 260);
+      --accent: oklch(0.26 0.008 260);
+      --danger: oklch(0.65 0.19 27);
+      --danger-soft: oklch(0.26 0.05 27);
+      --ok: oklch(0.7 0.14 150);
+      --warn: oklch(0.75 0.13 80);
+      --warn-soft: oklch(0.27 0.04 85);
+      --app: oklch(0.72 0.13 255);
+      --app-soft: oklch(0.28 0.05 255);
+      --sys: oklch(0.72 0.12 310);
+      --sys-soft: oklch(0.28 0.05 310);
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: "Lilex", ui-monospace, SFMono-Regular, Menlo, monospace;
+    background: var(--background);
+    color: var(--foreground);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    font-size: 15px;
+  }
+
+  a { color: inherit; }
+
+  .wrap {
+    max-width: 1020px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ---------- header ---------- */
+  header {
+    border-bottom: 1px solid var(--border);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-block: 14px;
+  }
+  .header-inner img {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+  }
+  .header-inner .name {
+    font-weight: 650;
+    font-size: 14px;
+    letter-spacing: -0.01em;
+  }
+  .header-inner nav {
+    margin-left: auto;
+    display: flex;
+    gap: 4px;
+  }
+  .header-inner nav a {
+    font-size: 13px;
+    color: var(--muted-foreground);
+    text-decoration: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: background-color 140ms cubic-bezier(0.3, 0, 0.2, 1), color 140ms cubic-bezier(0.3, 0, 0.2, 1);
+  }
+  .header-inner nav a:hover {
+    background: var(--accent);
+    color: var(--foreground);
+  }
+
+  /* ---------- hero ---------- */
+  .hero {
+    padding-block: 80px 64px;
+    text-align: center;
+  }
+  .hero img.mark {
+    width: 96px;
+    height: 96px;
+    border-radius: 22px;
+    margin-bottom: 28px;
+  }
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 550;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    margin-bottom: 14px;
+  }
+  h1 {
+    font-size: clamp(30px, 5.4vw, 46px);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 1.12;
+    margin-bottom: 18px;
+  }
+  .hero p.lede {
+    max-width: 58ch;
+    margin: 0 auto 32px;
+    color: var(--muted-foreground);
+    font-size: 15.5px;
+  }
+  .cta-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font: inherit;
+    font-size: 13.5px;
+    font-weight: 550;
+    padding: 11px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: opacity 140ms cubic-bezier(0.3, 0, 0.2, 1), background-color 140ms cubic-bezier(0.3, 0, 0.2, 1), transform 140ms cubic-bezier(0.3, 0, 0.2, 1);
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn:focus-visible, .header-inner nav a:focus-visible {
+    outline: 2px solid var(--app);
+    outline-offset: 2px;
+  }
+  .btn-primary {
+    background: var(--foreground);
+    color: var(--background);
+  }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-ghost {
+    border-color: var(--border);
+    color: var(--foreground);
+  }
+  .btn-ghost:hover { background: var(--accent); }
+  .hero .fineprint {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--muted-foreground);
+  }
+
+  /* ---------- app mock ---------- */
+  .mock-outer {
+    padding-block: 0 96px;
+  }
+  .mock {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--background);
+    box-shadow: 0 24px 48px -24px oklch(0 0 0 / 0.25);
+    max-width: 860px;
+    margin: 0 auto;
+    text-align: left;
+    font-size: 12.5px;
+  }
+  .mock-titlebar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .traffic { display: flex; gap: 6px; }
+  .traffic span {
+    width: 11px; height: 11px; border-radius: 50%;
+  }
+  .traffic span:nth-child(1) { background: #ff5f57; }
+  .traffic span:nth-child(2) { background: #febc2e; }
+  .traffic span:nth-child(3) { background: #28c840; }
+  .mock-titlebar .t {
+    margin-left: 6px;
+    font-weight: 650;
+    font-size: 12.5px;
+  }
+  .mock-titlebar .c {
+    color: var(--muted-foreground);
+    font-size: 11.5px;
+  }
+  .mock table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .mock th {
+    text-align: left;
+    font-size: 9.5px;
+    font-weight: 550;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted-foreground);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .mock td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+  .mock tr:last-child td { border-bottom: none; }
+  .mock .port { font-weight: 650; font-variant-numeric: tabular-nums; }
+  .mock .dim { color: var(--muted-foreground); }
+  .mock .proc { font-weight: 550; }
+  .mock .sub { font-size: 11px; color: var(--muted-foreground); }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 9.5px;
+    font-weight: 550;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    border-radius: 5px;
+  }
+  .badge.dev { background: var(--accent); color: var(--ok); }
+  .badge.system { background: var(--sys-soft); color: var(--sys); }
+  .badge.app-b { background: var(--app-soft); color: var(--app); }
+  .row-icons {
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+    color: var(--muted-foreground);
+  }
+  .row-icons .warn-i { color: var(--warn); }
+  .row-icons .danger-i { color: var(--danger); }
+  .row-icons .app-i { color: var(--app); }
+  .mock svg { display: block; }
+
+  /* ---------- sections ---------- */
+  section.wrap { padding-block: 0 96px; }
+  .section-head {
+    margin-bottom: 36px;
+    max-width: 60ch;
+  }
+  .section-head h2 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+  .section-head p {
+    color: var(--muted-foreground);
+    font-size: 14px;
+  }
+
+  .features {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .feature {
+    padding: 22px 20px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .feature:nth-child(4n) { border-right: none; }
+  .feature:nth-child(n+5) { border-bottom: none; }
+  .feature .f-icon {
+    color: var(--muted-foreground);
+    margin-bottom: 12px;
+  }
+  .feature h3 {
+    font-size: 13.5px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+  .feature p {
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--muted-foreground);
+  }
+
+  .how {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .how-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 20px;
+  }
+  .how-card .n {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    background: var(--muted);
+    font-size: 12px;
+    font-weight: 650;
+    margin-bottom: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  .how-card h3 {
+    font-size: 13.5px;
+    font-weight: 650;
+    margin-bottom: 6px;
+  }
+  .how-card p {
+    font-size: 12.5px;
+    color: var(--muted-foreground);
+  }
+  .how-card code {
+    font-family: inherit;
+    font-size: 11.5px;
+    background: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+
+
+  .closer {
+    text-align: center;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 56px 24px;
+    background: var(--muted);
+  }
+  .closer h2 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    margin-bottom: 10px;
+  }
+  .closer p {
+    color: var(--muted-foreground);
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 28px 0 48px;
+    font-size: 12.5px;
+    color: var(--muted-foreground);
+  }
+  .footer-inner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .footer-inner a { color: var(--muted-foreground); }
+  .footer-inner a:hover { color: var(--foreground); }
+  .footer-inner .spacer { margin-left: auto; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .btn, .header-inner nav a { transition: none; }
+  }
+
+  @media (max-width: 880px) {
+    .features { grid-template-columns: repeat(2, 1fr); }
+    .feature:nth-child(4n) { border-right: 1px solid var(--border); }
+    .feature:nth-child(2n) { border-right: none; }
+    .feature:nth-child(n+5) { border-bottom: 1px solid var(--border); }
+    .feature:nth-child(n+7) { border-bottom: none; }
+    .how { grid-template-columns: 1fr; }
+    .mock .hide-sm { display: none; }
+  }
+
+  @media (max-width: 560px) {
+    .hero { padding-block: 64px 52px; }
+    .features { grid-template-columns: 1fr; }
+    .feature { border-right: none !important; border-bottom: 1px solid var(--border) !important; }
+    .feature:last-child { border-bottom: none !important; }
+    .mock { font-size: 11.5px; }
+    .mock .hide-xs { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap header-inner">
+    <img src="icon.png" alt="" width="22" height="22" />
+    <span class="name">Portero</span>
+    <nav aria-label="Main">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="faq">FAQ</a>
+      <a data-repo-link href="#">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <img class="mark" src="icon.png" alt="Portero app icon" width="96" height="96" />
+    <p class="eyebrow">Free and open source, for macOS</p>
+    <h1>Know what's listening.</h1>
+    <p class="lede">
+      A database here, a dev server there, an API you forgot was still open.
+      Portero gives you a clear view of everything running on your machine,
+      so you always know what's using each port and can stop what you don't need.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary" data-releases-link href="#" data-primary-cta>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><path d="M7 11l5 5 5-5"/><path d="M12 4v12"/></svg>
+        Download for macOS
+      </a>
+      <a class="btn btn-ghost" data-repo-link href="#">View source</a>
+    </div>
+    <p class="fineprint">Apple Silicon and Intel · unsigned build, right-click then Open on first launch</p>
+  </div>
+
+  <div class="wrap mock-outer" aria-hidden="true">
+    <div class="mock">
+      <div class="mock-titlebar">
+        <div class="traffic"><span></span><span></span><span></span></div>
+        <span class="t">Portero</span>
+        <span class="c">5 listening ports</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Port</th>
+            <th>Process</th>
+            <th class="hide-xs">Category</th>
+            <th class="hide-sm">Address</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="port">3000
+              <svg style="display:inline;vertical-align:-2px;color:var(--warn)" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M10.4 3.9L1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.6 3.9a2 2 0 0 0-3.2 0z"/><path d="M12 16h.01"/></svg>
+            </td>
+            <td><span class="proc">node</span><div class="sub">Next.js dev server · project "storefront"</div></td>
+            <td class="hide-xs"><span class="badge dev">Terminal</span></td>
+            <td class="hide-sm dim">127.0.0.1</td>
+            <td><span class="row-icons">
+              <svg class="app-i" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8"/><path d="M3.6 15h16.8"/><path d="M11.5 3a17 17 0 0 0 0 18"/><path d="M12.5 3a17 17 0 0 1 0 18"/></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg>
+            </span></td>
+          </tr>
+          <tr>
+            <td class="port">5173</td>
+            <td><span class="proc">node</span><div class="sub">Vite dev server · project "portero"</div></td>
+            <td class="hide-xs"><span class="badge dev">Terminal</span></td>
+            <td class="hide-sm dim">*</td>
+            <td><span class="row-icons">
+              <svg class="app-i" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8"/><path d="M3.6 15h16.8"/><path d="M11.5 3a17 17 0 0 0 0 18"/><path d="M12.5 3a17 17 0 0 1 0 18"/></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg>
+            </span></td>
+          </tr>
+          <tr>
+            <td class="port">5432</td>
+            <td><span class="proc">postgres</span><div class="sub">PostgreSQL database</div></td>
+            <td class="hide-xs"><span class="badge dev">Terminal</span></td>
+            <td class="hide-sm dim">127.0.0.1</td>
+            <td><span class="row-icons">
+              <svg style="color:var(--warn)" width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 17.75l-6.17 3.25 1.18-6.88-5-4.87 6.9-1L12 2l3.09 6.25 6.9 1-5 4.87 1.18 6.88z"/></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg>
+            </span></td>
+          </tr>
+          <tr>
+            <td class="port">7000
+              <svg style="display:inline;vertical-align:-2px;color:var(--danger)" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><circle cx="12" cy="16" r="1"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            </td>
+            <td><span class="proc">ControlCenter</span><div class="sub">Control Center, AirPlay receiver</div></td>
+            <td class="hide-xs"><span class="badge system">System</span></td>
+            <td class="hide-sm dim">*</td>
+            <td><span class="row-icons">
+              <svg class="danger-i" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><circle cx="12" cy="16" r="1"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            </span></td>
+          </tr>
+          <tr>
+            <td class="port">11434</td>
+            <td><span class="proc">ollama</span><div class="sub">Ollama, local LLM server</div></td>
+            <td class="hide-xs"><span class="badge app-b">App</span></td>
+            <td class="hide-sm dim">127.0.0.1</td>
+            <td><span class="row-icons">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg>
+            </span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <section id="features" class="wrap">
+    <div class="section-head">
+      <h2>Everything a port needs</h2>
+      <p>Not just a list of numbers. Portero explains what each process is, in plain words, and gives you the actions you actually reach for.</p>
+    </div>
+    <div class="features">
+      <div class="feature">
+        <div class="f-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M3 14h18"/></svg></div>
+        <h3>Live overview</h3>
+        <p>Every listening TCP and UDP port, with process, PID, address, user, and start time. Auto-refreshed.</p>
+      </div>
+      <div class="feature">
+        <div class="f-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v4h1"/></svg></div>
+        <h3>Plain words</h3>
+        <p>"Vite dev server", "PostgreSQL database", "AirDrop and sharing". Hundreds of processes and ports recognized.</p>
+      </div>
+      <div class="feature">
+        <div class="f-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg></div>
+        <h3>One-click kill</h3>
+        <p>Graceful stop or force kill, one process or many at once, always behind a clear confirmation.</p>
+      </div>
+      <div class="feature">
+        <div class="f-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><circle cx="12" cy="16" r="1"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+        <h3>Port blocking</h3>
+        <p>Block inbound or outbound traffic on any port with the built-in macOS firewall. No system files touched.</p>
+      </div>
+      <div class="feature">
+        <div class="f-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M10.4 3.9L1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.6 3.9a2 2 0 0 0-3.2 0z"/><path d="M12 16h.01"/></svg></div>
+        <h3>Conflict detection</h3>
+        <p>Two processes on the same port is the classic "address already in use". Portero flags it before you hit it.</p>
+      </div>
+      <div class="feature">
+        <div class="f-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8"/><path d="M3.6 15h16.8"/><path d="M11.5 3a17 17 0 0 0 0 18"/><path d="M12.5 3a17 17 0 0 1 0 18"/></svg></div>
+        <h3>Open in browser</h3>
+        <p>When a port answers HTTP, a globe appears. One click opens your dev server in the browser.</p>
+      </div>
+      <div class="feature">
+        <div class="f-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17.75l-6.17 3.25 1.18-6.88-5-4.87 6.9-1L12 2l3.09 6.25 6.9 1-5 4.87 1.18 6.88z"/></svg></div>
+        <h3>Favorites protect</h3>
+        <p>Star what matters. Favorited processes cannot be killed until you unstar them, even in bulk actions.</p>
+      </div>
+      <div class="feature">
+        <div class="f-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h7"/><path d="M9 3v2c0 4.4-2.7 7.9-6 9"/><path d="M5 9c0 2.1 2.8 4.2 6 4.5"/><path d="M12 20l4-9 4 9"/><path d="M19.1 18h-6.2"/></svg></div>
+        <h3>Two languages</h3>
+        <p>English and Portuguese out of the box, switchable in Settings along with sounds and refresh rate.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" class="wrap">
+    <div class="section-head">
+      <h2>Native tools, nothing weird</h2>
+      <p>Portero is a small Tauri app. The Rust backend talks to the same tools you would use in the terminal.</p>
+    </div>
+    <div class="how">
+      <div class="how-card">
+        <span class="n">1</span>
+        <h3>Discover</h3>
+        <p><code>lsof</code> and <code>ps</code> find every listening socket and enrich it with the full command line, working directory, and parent process.</p>
+      </div>
+      <div class="how-card">
+        <span class="n">2</span>
+        <h3>Block</h3>
+        <p><code>pfctl</code> writes rules into a dedicated <code>com.apple/portero</code> anchor that the stock firewall config already references. Your system files stay untouched.</p>
+      </div>
+      <div class="how-card">
+        <span class="n">3</span>
+        <h3>Ask first</h3>
+        <p>Admin privileges are requested through the standard macOS password prompt, and only when you apply a firewall change. Killing your own processes never needs one.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="closer">
+      <h2>Stop debugging port conflicts.</h2>
+      <p>Free, open source, and built for the way you actually work.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" data-releases-link href="#">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><path d="M7 11l5 5 5-5"/><path d="M12 4v12"/></svg>
+          Download for macOS
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap footer-inner">
+    <span>Portero</span>
+    <span>·</span>
+    <a data-repo-link href="#">Source on GitHub</a>
+  </div>
+</footer>
+
+<script>
+  // Single place to point every GitHub link at the right repo.
+  const REPO = "joaodavisn/portero";
+  for (const a of document.querySelectorAll("[data-repo-link]")) {
+    a.href = "https://github.com/" + REPO;
+  }
+  for (const a of document.querySelectorAll("[data-releases-link]")) {
+    a.href = "https://github.com/" + REPO + "/releases/latest";
+  }
+</script>
+
+</body>
+</html>

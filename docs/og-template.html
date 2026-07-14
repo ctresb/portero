@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  @font-face {
+    font-family: "Lilex";
+    src: url("lilex-var.ttf") format("truetype-variations");
+    font-weight: 100 900;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1200px;
+    height: 630px;
+    font-family: "Lilex", ui-monospace, monospace;
+    background: oklch(0.19 0.005 260);
+    color: oklch(0.92 0.005 90);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+  .left {
+    flex: 1;
+    padding: 0 0 0 84px;
+  }
+  .left img { width: 108px; height: 108px; border-radius: 24px; margin-bottom: 40px; }
+  .eyebrow {
+    font-size: 17px;
+    font-weight: 550;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: oklch(0.62 0.01 260);
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-size: 64px;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+    margin-bottom: 22px;
+  }
+  .sub {
+    font-size: 22px;
+    line-height: 1.5;
+    color: oklch(0.62 0.01 260);
+    max-width: 24ch;
+  }
+  .mock {
+    width: 470px;
+    margin-right: 76px;
+    border: 1px solid oklch(0.29 0.008 260);
+    border-radius: 16px;
+    overflow: hidden;
+    background: oklch(0.21 0.006 260);
+    box-shadow: 0 40px 80px -32px oklch(0 0 0 / 0.5);
+    font-size: 15px;
+  }
+  .bar {
+    display: flex; align-items: center; gap: 9px;
+    padding: 16px 18px;
+    border-bottom: 1px solid oklch(0.29 0.008 260);
+  }
+  .bar b { font-size: 15px; margin-left: 6px; }
+  .bar span.c { color: oklch(0.62 0.01 260); font-size: 13px; }
+  .dot { width: 13px; height: 13px; border-radius: 50%; }
+  .row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 15px 18px;
+    border-bottom: 1px solid oklch(0.29 0.008 260);
+  }
+  .row:last-child { border-bottom: none; }
+  .port { font-weight: 650; width: 74px; font-variant-numeric: tabular-nums; }
+  .proc { flex: 1; min-width: 0; }
+  .proc b { display: block; font-weight: 550; }
+  .proc span { font-size: 12.5px; color: oklch(0.62 0.01 260); }
+  .badge {
+    font-size: 10.5px; font-weight: 550; text-transform: uppercase;
+    letter-spacing: 0.06em; padding: 3px 9px; border-radius: 6px;
+  }
+  .dev { background: oklch(0.26 0.008 260); color: oklch(0.7 0.14 150); }
+  .sys { background: oklch(0.28 0.05 310); color: oklch(0.72 0.12 310); }
+</style>
+</head>
+<body>
+  <div class="left">
+    <img src="icon.png" alt="" />
+    <div class="eyebrow">Free port manager for macOS</div>
+    <h1>Know what's listening.</h1>
+    <div class="sub">See every open port, kill what you don't need, block the rest.</div>
+  </div>
+  <div class="mock">
+    <div class="bar">
+      <div class="dot" style="background:#ff5f57"></div>
+      <div class="dot" style="background:#febc2e"></div>
+      <div class="dot" style="background:#28c840"></div>
+      <b>Portero</b><span class="c">4 listening ports</span>
+    </div>
+    <div class="row">
+      <span class="port">3000</span>
+      <span class="proc"><b>node</b><span>Next.js dev server</span></span>
+      <span class="badge dev">Terminal</span>
+    </div>
+    <div class="row">
+      <span class="port">5173</span>
+      <span class="proc"><b>node</b><span>Vite dev server</span></span>
+      <span class="badge dev">Terminal</span>
+    </div>
+    <div class="row">
+      <span class="port">5432</span>
+      <span class="proc"><b>postgres</b><span>PostgreSQL database</span></span>
+      <span class="badge dev">Terminal</span>
+    </div>
+    <div class="row">
+      <span class="port">7000</span>
+      <span class="proc"><b>ControlCenter</b><span>AirPlay receiver</span></span>
+      <span class="badge sys">System</span>
+    </div>
+  </div>
+</body>
+</html>

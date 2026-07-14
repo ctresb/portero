@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>How to See, Kill, and Block Ports on macOS | Portero FAQ</title>
+<meta name="description" content="Straight answers to common macOS port questions: how to see which ports are in use, kill a process on a port, fix 'address already in use', and block a port with the pf firewall." />
+<link rel="canonical" href="https://porteroapp.pages.dev/faq" />
+<meta name="robots" content="index, follow, max-image-preview:large" />
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#fbfbfa" />
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#17181c" />
+<link rel="icon" type="image/png" href="icon.png" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Portero" />
+<meta property="og:url" content="https://porteroapp.pages.dev/faq" />
+<meta property="og:title" content="How to See, Kill, and Block Ports on macOS" />
+<meta property="og:description" content="Straight answers to common macOS port questions, from the makers of Portero." />
+<meta property="og:image" content="https://porteroapp.pages.dev/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="How to See, Kill, and Block Ports on macOS" />
+<meta name="twitter:description" content="Straight answers to common macOS port questions, from the makers of Portero." />
+<meta name="twitter:image" content="https://porteroapp.pages.dev/og.png" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I see which ports are in use on my Mac?",
+      "acceptedAnswer": { "@type": "Answer", "text": "In the terminal, run lsof -nP -iTCP -sTCP:LISTEN to list every listening TCP port. If you'd rather not memorize flags, Portero shows all listening ports in a live table, with each process explained in plain words, its PID, address, and start time." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I kill a process running on a specific port?",
+      "acceptedAnswer": { "@type": "Answer", "text": "In the terminal, find the PID with lsof -ti :3000 and run kill with that PID. In Portero you just click Kill on the row, with a choice between a graceful stop (SIGTERM) and a force kill (SIGKILL)." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I fix the 'address already in use' error?",
+      "acceptedAnswer": { "@type": "Answer", "text": "That error means two processes are trying to use the same port. Portero detects these conflicts automatically, flags the port, and shows exactly which processes collide so you can stop the one you don't need." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I block a port on macOS?",
+      "acceptedAnswer": { "@type": "Answer", "text": "macOS ships with the pf firewall, normally driven by pfctl in the terminal. Portero writes the pf rules for you: pick a port, choose inbound or outbound blocking, and confirm with your administrator password. No system files are modified." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is Portero free?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Portero is free and open source, and runs on both Apple Silicon and Intel Macs." }
+    }
+  ]
+}
+</script>
+<style>
+  @font-face {
+    font-family: "Lilex";
+    src: url("lilex-var.ttf") format("truetype-variations");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  :root {
+    --background: oklch(0.985 0.002 90);
+    --foreground: oklch(0.21 0.01 260);
+    --muted: oklch(0.955 0.003 90);
+    --muted-foreground: oklch(0.52 0.01 260);
+    --border: oklch(0.9 0.004 90);
+    --accent: oklch(0.94 0.004 90);
+    --app: oklch(0.55 0.15 255);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: oklch(0.19 0.005 260);
+      --foreground: oklch(0.92 0.005 90);
+      --muted: oklch(0.235 0.006 260);
+      --muted-foreground: oklch(0.62 0.01 260);
+      --border: oklch(0.29 0.008 260);
+      --accent: oklch(0.26 0.008 260);
+      --app: oklch(0.72 0.13 255);
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: "Lilex", ui-monospace, SFMono-Regular, Menlo, monospace;
+    background: var(--background);
+    color: var(--foreground);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    font-size: 15px;
+  }
+
+  a { color: inherit; }
+
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  header { border-bottom: 1px solid var(--border); }
+  .header-inner {
+    max-width: 1020px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .header-inner img { width: 22px; height: 22px; border-radius: 5px; }
+  .header-inner .name {
+    font-weight: 650;
+    font-size: 14px;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+  }
+  .header-inner nav { margin-left: auto; display: flex; gap: 4px; }
+  .header-inner nav a {
+    font-size: 13px;
+    color: var(--muted-foreground);
+    text-decoration: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: background-color 140ms cubic-bezier(0.3, 0, 0.2, 1), color 140ms cubic-bezier(0.3, 0, 0.2, 1);
+  }
+  .header-inner nav a:hover { background: var(--accent); color: var(--foreground); }
+  .header-inner nav a[aria-current="page"] { color: var(--foreground); }
+
+  main.wrap { padding-block: 64px 96px; }
+
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 550;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-size: clamp(26px, 4.6vw, 36px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin-bottom: 12px;
+  }
+  .lede {
+    color: var(--muted-foreground);
+    font-size: 14.5px;
+    margin-bottom: 48px;
+    max-width: 60ch;
+  }
+
+  article {
+    padding-block: 28px;
+    border-top: 1px solid var(--border);
+  }
+  article:last-of-type { border-bottom: 1px solid var(--border); }
+  article h2 {
+    font-size: 16px;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    margin-bottom: 10px;
+  }
+  article p {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--muted-foreground);
+    max-width: 68ch;
+  }
+  article p + p { margin-top: 10px; }
+  article code {
+    font-family: inherit;
+    font-size: 12.5px;
+    background: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--foreground);
+  }
+  article a { color: var(--app); }
+
+  .back-cta {
+    margin-top: 48px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font: inherit;
+    font-size: 13.5px;
+    font-weight: 550;
+    padding: 11px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: opacity 140ms cubic-bezier(0.3, 0, 0.2, 1), background-color 140ms cubic-bezier(0.3, 0, 0.2, 1), transform 140ms cubic-bezier(0.3, 0, 0.2, 1);
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn:focus-visible { outline: 2px solid var(--app); outline-offset: 2px; }
+  .btn-primary { background: var(--foreground); color: var(--background); }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-ghost { border-color: var(--border); color: var(--foreground); }
+  .btn-ghost:hover { background: var(--accent); }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 28px 0 48px;
+    font-size: 12.5px;
+    color: var(--muted-foreground);
+  }
+  .footer-inner {
+    max-width: 1020px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .footer-inner a { color: var(--muted-foreground); }
+  .footer-inner a:hover { color: var(--foreground); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn, .header-inner nav a { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <img src="icon.png" alt="" width="22" height="22" />
+    <a class="name" href="./">Portero</a>
+    <nav aria-label="Main">
+      <a href="./#features">Features</a>
+      <a href="./#how">How it works</a>
+      <a href="faq" aria-current="page">FAQ</a>
+      <a data-repo-link href="#">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="eyebrow">FAQ</p>
+  <h1>Questions about ports on macOS</h1>
+  <p class="lede">Short answers, with the terminal commands if you prefer doing things by hand.</p>
+
+  <article>
+    <h2>How do I see which ports are in use on my Mac?</h2>
+    <p>In the terminal, run <code>lsof -nP -iTCP -sTCP:LISTEN</code> to list every listening TCP port and the process behind each one.</p>
+    <p>If you'd rather not memorize flags, <a href="./">Portero</a> shows all listening ports in a live table, with each process explained in plain words, its PID, address, and start time.</p>
+  </article>
+
+  <article>
+    <h2>How do I kill a process running on a specific port?</h2>
+    <p>In the terminal, find the PID with <code>lsof -ti :3000</code> and pass it to <code>kill</code>. Add <code>-9</code> only if the process ignores the first signal.</p>
+    <p>In Portero you just click Kill on the row, with a choice between a graceful stop (SIGTERM) and a force kill (SIGKILL). Select several rows to kill them all at once.</p>
+  </article>
+
+  <article>
+    <h2>How do I fix the "address already in use" error?</h2>
+    <p>That error means two processes are trying to use the same port. Usually it's an old dev server that never died, or two projects configured for the same port.</p>
+    <p>Portero detects these conflicts automatically, flags the port, and shows exactly which processes collide so you can stop the one you don't need.</p>
+  </article>
+
+  <article>
+    <h2>How do I block a port on macOS?</h2>
+    <p>macOS ships with the pf firewall, normally driven by <code>pfctl</code> and rule files in the terminal.</p>
+    <p>Portero writes the pf rules for you: pick a port, choose inbound or outbound blocking, and confirm with your administrator password. Rules live in a dedicated anchor, so no system files are modified.</p>
+  </article>
+
+  <article>
+    <h2>Is Portero free?</h2>
+    <p>Yes. Portero is free and open source, and runs on both Apple Silicon and Intel Macs.</p>
+  </article>
+
+  <div class="back-cta">
+    <a class="btn btn-primary" data-releases-link href="#">Download Portero for macOS</a>
+    <a class="btn btn-ghost" href="./">Back to the site</a>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <span>Portero</span>
+    <span>·</span>
+    <a data-repo-link href="#">Source on GitHub</a>
+  </div>
+</footer>
+
+<script>
+  const REPO = "joaodavisn/portero";
+  for (const a of document.querySelectorAll("[data-repo-link]")) {
+    a.href = "https://github.com/" + REPO;
+  }
+  for (const a of document.querySelectorAll("[data-releases-link]")) {
+    a.href = "https://github.com/" + REPO + "/releases/latest";
+  }
+</script>
+
+</body>
+</html>
