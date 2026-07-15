@@ -37,7 +37,21 @@ Portero gives you a clear view of everything running on your machine, so you alw
 
 Grab the latest `.dmg` for your Mac (Apple Silicon or Intel) from the [Releases](../../releases) page, open it, and drag Portero to Applications.
 
-Builds are not signed with an Apple Developer certificate yet. The first time you open the app, right-click it in Applications and choose **Open**.
+Builds are not signed with an Apple Developer certificate yet. macOS quarantines downloaded apps until you explicitly allow them.
+
+### First launch — recommended: Terminal
+
+This is the quickest and most reliable option. One command works for everyone, including non-admin users. Approving the app through System Settings can fail, and the **Open Anyway** button may not appear at all.
+
+After moving Portero to Applications, run:
+
+```sh
+xattr -dr com.apple.quarantine /Applications/Portero.app
+```
+
+Then open Portero normally from Applications or Spotlight.
+
+**Alternative:** right-click Portero in Applications, choose **Open**, and confirm in the security dialog.
 
 ## How to use
 
